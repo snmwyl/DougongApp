@@ -95,6 +95,9 @@
 
 ## 📂 项目结构
 
+# 项目结构
+
+```text
 DougongApp/
 ├── app/
 │   ├── src/
@@ -115,7 +118,8 @@ DougongApp/
 │   └── build.gradle
 ├── build.gradle
 ├── settings.gradle
- README.md
+README.md
+```
 
 **3D模型文件清单（共9个）：**
 
