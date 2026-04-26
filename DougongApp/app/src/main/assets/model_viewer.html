@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>斗拱3D查看器</title>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Microsoft YaHei', sans-serif; }
+        #info {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: white;
+            background: rgba(0,0,0,0.6);
+            padding: 8px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .controls-hint {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: rgba(255,255,255,0.5);
+            background: rgba(0,0,0,0.4);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            z-index: 20;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+<div id="info">栌斗 | 位于柱顶，承受上部荷载</div>
+<div class="controls-hint">🖱️ 手指拖拽旋转 | ✌️ 双指缩放</div>
+<div id="loading" class="loading">加载模型中...</div>
+
+<script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+        }
+    }
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+    // 初始化场景
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1a1a2e);
+    scene.fog = new THREE.FogExp2(0x1a1a2e, 0.02);
+
+    // 初始化相机
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(2, 1.5, 2);
+    camera.lookAt(0, 0, 0);
+
+    // 初始化渲染器
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    document.body.appendChild(renderer.domElement);
+
+    // 控制器
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.autoRotate = false;
+    controls.enableZoom = true;
+    controls.enablePan = true;
+    controls.zoomSpeed = 1.0;
+    controls.rotateSpeed = 1.0;
+    controls.target.set(0, 0, 0);
+
+    // 添加环境光
+    const ambientLight = new THREE.AmbientLight(0x404060);
+    scene.add(ambientLight);
+
+    // 添加主光源
+    const mainLight = new THREE.DirectionalLight(0xffffff, 1);
+    mainLight.position.set(2, 3, 2);
+    mainLight.castShadow = true;
+    scene.add(mainLight);
+
+    // 补光
+    const fillLight = new THREE.PointLight(0x8866ff, 0.3);
+    fillLight.position.set(1, 1, 2);
+    scene.add(fillLight);
+
+    const backLight = new THREE.PointLight(0xff8866, 0.3);
+    backLight.position.set(-1, 1, -1);
+    scene.add(backLight);
+
+    // 辅助网格
+    const gridHelper = new THREE.GridHelper(5, 20, 0x888888, 0x444444);
+    gridHelper.position.y = -0.5;
+    scene.add(gridHelper);
+
+    // 加载模型相关
+    let currentModel = null;
+    const loadingDiv = document.getElementById('loading');
+
+    // 隐藏加载提示
+    function hideLoading() {
+        if (loadingDiv) {
+            loadingDiv.style.display = 'none';
+        }
+    }
+
+    // 显示加载提示
+    function showLoading() {
+        if (loadingDiv) {
+            loadingDiv.style.display = 'block';
+        }
+    }
+
+    function loadModel(path) {
+        showLoading();
+
+        if (currentModel) {
+            scene.remove(currentModel);
+            // 清理资源
+            if (currentModel.traverse) {
+                currentModel.traverse((node) => {
+                    if (node.isMesh) {
+                        if (node.material) {
+                            if (Array.isArray(node.material)) {
+                                node.material.forEach(m => m.dispose());
+                            } else {
+                                node.material.dispose();
+                            }
+                        }
+                        if (node.geometry) {
+                            node.geometry.dispose();
+                        }
+                    }
+                });
+            }
+        }
+
+        const loader = new GLTFLoader();
+        loader.load(path,
+            (gltf) => {
+                currentModel = gltf.scene;
+                currentModel.traverse((node) => {
+                    if (node.isMesh) {
+                        node.castShadow = true;
+                        node.receiveShadow = true;
+                    }
+                });
+                scene.add(currentModel);
+
+                // 调整模型位置和大小
+                const box = new THREE.Box3().setFromObject(currentModel);
+                const center = box.getCenter(new THREE.Vector3());
+                const size = box.getSize(new THREE.Vector3());
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const scale = 1.5 / maxDim;
+                currentModel.scale.setScalar(scale);
+                currentModel.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
+
+                controls.target.set(0, 0, 0);
+                controls.update();
+
+                hideLoading();
+                console.log('模型加载成功:', path);
+            },
+            (progress) => {
+                if (progress.total > 0) {
+                    const percent = Math.round(progress.loaded / progress.total * 100);
+                    if (loadingDiv) {
+                        loadingDiv.innerHTML = `加载中... ${percent}%`;
+                    }
+                }
+                console.log('加载进度:', path, (progress.loaded / progress.total * 100).toFixed(2) + '%');
+            },
+            (error) => {
+                console.error('模型加载失败:', path, error);
+                hideLoading();
+                document.getElementById('info').innerHTML = `加载失败: ${path}<br>请检查文件是否存在`;
+                document.getElementById('info').style.background = 'rgba(255,0,0,0.7)';
+
+                // 3秒后恢复样式
+                setTimeout(() => {
+                    document.getElementById('info').style.background = 'rgba(0,0,0,0.6)';
+                }, 3000);
+            }
+        );
+    }
+
+    // 从 Android 调用更新模型
+    window.updateModel = function(modelFileName, title, description) {
+        // 自动处理路径：如果传入的是纯文件名（不含路径和扩展名），自动补全
+        let fullPath = modelFileName;
+
+        // 如果没有 .glb 扩展名，添加
+        if (!fullPath.endsWith('.glb') && !fullPath.endsWith('.gltf')) {
+            fullPath = fullPath + '.glb';
+        }
+
+        // 如果没有 models/ 前缀，添加
+        if (!fullPath.startsWith('models/')) {
+            fullPath = 'models/' + fullPath;
+        }
+
+        console.log('加载模型:', fullPath);
+        loadModel(fullPath);
+        document.getElementById('info').innerHTML = `${title} | ${description}`;
+        document.getElementById('info').style.background = 'rgba(0,0,0,0.6)';
+    };
+
+    // 初始加载：加载栌斗模型
+    loadModel('models/ludou.glb');
+
+    // 动画循环
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    // 窗口适配
+    window.addEventListener('resize', onWindowResize, false);
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // 页面加载完成后，通知 Android 已就绪
+    window.onload = function() {
+        console.log('3D查看器已就绪');
+        if (window.Android) {
+            window.Android.onPageReady();
+        }
+    };
+</script>
+</body>
+</html>

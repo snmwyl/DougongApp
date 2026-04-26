@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="#F5F0E8"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="🏛️"
+        android:textSize="72dp"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="探秘斗拱"
+        android:textSize="28dp"
+        android:textColor="#B5282C"
+        android:textStyle="bold"
+        android:layout_marginBottom="12dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="中国古代木结构建筑的核心构件"
+        android:textSize="14dp"
+        android:textColor="#4A6A8A"
+        android:layout_marginBottom="24dp" />
+
+    <!-- 视频缩略图（点击后隐藏，显示 WebView） -->
+    <FrameLayout
+        android:id="@+id/video_container"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:layout_marginBottom="16dp">
+
+        <ImageView
+            android:id="@+id/video_thumbnail"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_video_placeholder"
+            android:background="#E0D8C8" />
+
+        <WebView
+            android:id="@+id/video_webview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/btn_play_video"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="▶ 点击观看讲解视频"
+        android:textSize="14dp"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/video_button_bg"
+        android:padding="10dp"
+        android:layout_gravity="center" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="👇 点击底部导航栏切换模式"
+        android:textSize="11dp"
+        android:textColor="#999"
+        android:layout_marginTop="40dp" />
+
+</LinearLayout>
