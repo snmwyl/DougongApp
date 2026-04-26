@@ -97,25 +97,25 @@
 
 DougongApp/
 ├── app/
-│ ├── src/
-│ │ └── main/
-│ │ ├── java/edu/hebut/dougongapp/
-│ │ │ ├── MainActivity.kt # 主活动，底部导航
-│ │ │ ├── HomeFragment.kt # 首页（文化展示+视频）
-│ │ │ ├── GameFragment.kt # 拼装游戏（拖拽交互）
-│ │ │ ├── ShowcaseFragment.kt # 科普展示（3D构件）
-│ │ │ └── LocalFileServer.kt # 本地HTTP服务器
-│ │ ├── res/
-│ │ │ ├── layout/ # 布局文件
-│ │ │ ├── drawable/ # 图标资源
-│ │ │ └── values/ # 颜色、字符串
-│ │ ├── assets/
-│ │ │ └── models/ # GLB 3D模型文件
-│ │ └── AndroidManifest.xml
-│ └── build.gradle
+│   ├── src/
+│   │   └── main/
+│   │       ├── java/edu/hebut/dougongapp/
+│   │       │   ├── MainActivity.kt          # 主活动，底部导航
+│   │       │   ├── HomeFragment.kt          # 首页（文化展示+视频）
+│   │       │   ├── GameFragment.kt          # 拼装游戏（拖拽交互）
+│   │       │   ├── ShowcaseFragment.kt      # 科普展示（3D构件）
+│   │       │   └── LocalFileServer.kt       # 本地HTTP服务器
+│   │       ├── res/
+│   │       │   ├── layout/                  # 布局文件
+│   │       │   ├── drawable/                # 图标资源
+│   │       │   └── values/                  # 颜色、字符串
+│   │       ├── assets/
+│   │       │   └── models/                  # GLB 3D模型文件
+│   │       └── AndroidManifest.xml
+│   └── build.gradle
 ├── build.gradle
 ├── settings.gradle
-└── README.md
+ README.md
 
 **3D模型文件清单（共9个）：**
 
